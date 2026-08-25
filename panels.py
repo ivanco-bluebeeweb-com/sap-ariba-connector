@@ -68,13 +68,20 @@ async def sap_ariba_connect_help(ctx, **kwargs) -> ui.UINode:
 @ext.panel("sap_ariba_sidebar", slot="left", title="SAP Ariba", default_width=340, min_width=280, max_width=460)
 async def sap_ariba_sidebar(ctx, **kwargs) -> ui.UINode:
     connections = await h._load_connections(ctx)
-    body: list[ui.UINode] = [_connection_rows(connections)]
+    body: list[ui.UINode] = [ui.Text("SAP Ariba", variant="title")]
     if connections:
+        body.append(_connection_rows(connections))
         body.append(ui.Divider())
-        body.append(ui.Button("Open Procurement overview", variant="primary", size="sm", full_width=True,
-                               on_click=ui.Call("__panel__sap_ariba_center")))
+        body.append(ui.ListItem(title="Overview", icon="LayoutDashboard",
+                                 on_click=ui.Call("__panel__sap_ariba_center")))
+        for label, key in [
+            ("Requisitions", "requisitions"), ("Purchase Orders", "purchase_orders"),
+            ("Invoices", "invoices"), ("Suppliers", "suppliers"),
+            ("Sourcing Events", "sourcing_events"), ("Contract Workspaces", "contract_workspaces"),
+        ]:
+            body.append(ui.ListItem(title=label, icon="ChevronRight",
+                                     on_click=ui.Call("__panel__sap_ariba_center", {"section": key})))
     else:
-        body.append(ui.Divider())
         body.append(_connect_form())
     body.append(ui.Divider())
     body.append(_settings_button())
@@ -87,57 +94,58 @@ async def sap_ariba_center_panel(ctx, **kwargs) -> ui.UINode:
     if not connections:
         return ui.Empty(message="Connect a SAP Ariba realm from the sidebar to see it here.", icon="🟦")
 
-    from schemas import AuditAccessParams, ListRequisitionsParams, ListPurchaseOrdersParams, ListSuppliersParams
+    from schemas import (
+        AuditAccessParams, ListRequisitionsParams, ListPurchaseOrdersParams,
+        ListInvoicesParams, ListSuppliersParams, ListSourcingEventsParams,
+        ListContractWorkspacesParams,
+    )
 
     conn_id = connections[0].get("id", "")
-    body: list[ui.UINode] = [ui.Text("Access audit", variant="subtitle")]
-    audit_result = await h.audit_ariba_access(ctx, AuditAccessParams(connection_id=conn_id))
-    if audit_result.success and audit_result.data:
-        r = audit_result.data
-        body.append(ui.Stats(children=[
-            ui.Stat(label="Available", value=str(r.available_count)),
-            ui.Stat(label="Unavailable", value=str(r.unavailable_count)),
-        ]))
-        for c in r.checks:
-            color = "green" if c.available else "red"
-            body.append(ui.Stack(direction="h", gap=2, align="center", children=[
-                ui.Badge(label="OK" if c.available else "BLOCKED", color=color),
-                ui.Text(c.name, variant="body"),
+    section = kwargs.get("section", "")
+    body: list[ui.UINode] = []
+
+    async def _section_table(title: str, result, columns) -> None:
+        body.append(ui.Text(title, variant="subtitle"))
+        if result.success and result.data and result.data.items:
+            rows = [{"id": r.id, "title": r.title} for r in result.data.items]
+            body.append(ui.DataTable(columns=columns, rows=rows))
+        else:
+            body.append(ui.Empty(message=f"No {title.lower()} found, or this package isn't licensed for this realm.", icon="Inbox"))
+
+    if not section:
+        body.append(ui.Text("Access audit", variant="subtitle"))
+        audit_result = await h.audit_ariba_access(ctx, AuditAccessParams(connection_id=conn_id))
+        if audit_result.success and audit_result.data:
+            r = audit_result.data
+            body.append(ui.Stats(children=[
+                ui.Stat(label="Available", value=str(r.available_count)),
+                ui.Stat(label="Unavailable", value=str(r.unavailable_count)),
             ]))
-    else:
-        body.append(ui.Text("Could not run the access audit.", variant="caption"))
-
-    body.append(ui.Divider())
-    body.append(ui.Text("Requisitions", variant="subtitle"))
-    req_result = await h.list_requisitions(ctx, ListRequisitionsParams(connection_id=conn_id, top=10))
-    if req_result.success and req_result.data and req_result.data.items:
-        body.append(ui.DataTable(
-            columns=[{"key": "id", "label": "Requisition"}, {"key": "title", "label": "Title"}],
-            rows=[{"id": item.id, "title": item.title} for item in req_result.data.items[:10]],
-        ))
-    else:
-        body.append(ui.Text("No requisitions found (or package not licensed for this realm).", variant="caption"))
-
-    body.append(ui.Divider())
-    body.append(ui.Text("Purchase orders", variant="subtitle"))
-    po_result = await h.list_purchase_orders(ctx, ListPurchaseOrdersParams(connection_id=conn_id, top=10))
-    if po_result.success and po_result.data and po_result.data.items:
-        body.append(ui.DataTable(
-            columns=[{"key": "id", "label": "Order"}, {"key": "title", "label": "Title"}],
-            rows=[{"id": item.id, "title": item.title} for item in po_result.data.items[:10]],
-        ))
-    else:
-        body.append(ui.Text("No purchase orders found (or package not licensed for this realm).", variant="caption"))
-
-    body.append(ui.Divider())
-    body.append(ui.Text("Suppliers", variant="subtitle"))
-    sup_result = await h.list_suppliers(ctx, ListSuppliersParams(connection_id=conn_id, top=10))
-    if sup_result.success and sup_result.data and sup_result.data.items:
-        body.append(ui.DataTable(
-            columns=[{"key": "id", "label": "Supplier ID"}, {"key": "title", "label": "Name"}],
-            rows=[{"id": item.id, "title": item.title} for item in sup_result.data.items[:10]],
-        ))
-    else:
-        body.append(ui.Text("No suppliers found (or package not licensed for this realm).", variant="caption"))
+            for c in r.checks:
+                color = "green" if c.available else "red"
+                body.append(ui.Stack(direction="h", gap=2, align="center", children=[
+                    ui.Badge(label="OK" if c.available else "BLOCKED", color=color),
+                    ui.Text(c.name, variant="body"),
+                ]))
+        else:
+            body.append(ui.Text("Could not run the access audit.", variant="caption"))
+    elif section == "requisitions":
+        result = await h.list_requisitions(ctx, ListRequisitionsParams(connection_id=conn_id, top=25))
+        await _section_table("Requisitions", result, [{"key": "id", "label": "ID"}, {"key": "title", "label": "Title"}])
+    elif section == "purchase_orders":
+        result = await h.list_purchase_orders(ctx, ListPurchaseOrdersParams(connection_id=conn_id, top=25))
+        await _section_table("Purchase Orders", result, [{"key": "id", "label": "PO"}, {"key": "title", "label": "Title"}])
+    elif section == "invoices":
+        result = await h.list_invoices(ctx, ListInvoicesParams(connection_id=conn_id, top=25))
+        await _section_table("Invoices", result, [{"key": "id", "label": "ID"}, {"key": "title", "label": "Title"}])
+    elif section == "suppliers":
+        result = await h.list_suppliers(ctx, ListSuppliersParams(connection_id=conn_id, top=25))
+        await _section_table("Suppliers", result, [{"key": "id", "label": "ID"}, {"key": "title", "label": "Name"}])
+    elif section == "sourcing_events":
+        result = await h.list_sourcing_events(ctx, ListSourcingEventsParams(connection_id=conn_id, top=25))
+        await _section_table("Sourcing Events", result, [{"key": "id", "label": "ID"}, {"key": "title", "label": "Title"}])
+    elif section == "contract_workspaces":
+        result = await h.list_contract_workspaces(ctx, ListContractWorkspacesParams(connection_id=conn_id, top=25))
+        await _section_table("Contract Workspaces", result, [{"key": "id", "label": "ID"}, {"key": "title", "label": "Title"}])
 
     return ui.Stack(direction="v", gap=3, align="stretch", children=body)
