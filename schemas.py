@@ -121,6 +121,9 @@ class Capability(sdl.Entity):
 class AccessAudit(sdl.Entity):
     realm: str
     capabilities: list[Capability] = Field(default_factory=list)
+    available_count: int = 0
+    unavailable_count: int = 0
+    checks: list[Capability] = Field(default_factory=list)
 
 
 class DeleteResult(sdl.Entity):

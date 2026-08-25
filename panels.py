@@ -102,7 +102,7 @@ async def sap_ariba_center_panel(ctx, **kwargs) -> ui.UINode:
             color = "green" if c.available else "red"
             body.append(ui.Stack(direction="h", gap=2, align="center", children=[
                 ui.Badge(label="OK" if c.available else "BLOCKED", color=color),
-                ui.Text(c.resource, variant="body"),
+                ui.Text(c.name, variant="body"),
             ]))
     else:
         body.append(ui.Text("Could not run the access audit.", variant="caption"))

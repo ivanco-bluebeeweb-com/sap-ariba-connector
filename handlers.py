@@ -279,4 +279,11 @@ async def audit_ariba_access(ctx, params: AuditAccessParams) -> ActionResult:
             capabilities.append(Capability(name=name, available=True, note="Responded successfully."))
         except ac.SAPAribaError as exc:
             capabilities.append(Capability(name=name, available=False, note=str(exc)))
-    return ActionResult.ok(AccessAudit(realm=connection.get("realm", ""), capabilities=capabilities))
+    available = sum(1 for c in capabilities if c.available)
+    return ActionResult.ok(AccessAudit(
+        realm=connection.get("realm", ""),
+        capabilities=capabilities,
+        checks=capabilities,
+        available_count=available,
+        unavailable_count=len(capabilities) - available,
+    ))
