@@ -1,0 +1,22 @@
+{
+  "connect_ariba": 0,
+  "disconnect_ariba": 0,
+  "list_connections": 0,
+
+  "list_requisitions": 8,
+  "get_requisition": 8,
+  "list_purchase_orders": 8,
+  "get_purchase_order": 8,
+  "list_invoices": 8,
+  "get_invoice": 8,
+  "list_suppliers": 8,
+  "get_supplier": 8,
+  "list_sourcing_events": 8,
+  "get_sourcing_event": 8,
+  "list_contract_workspaces": 8,
+  "get_contract_workspace": 8,
+
+  "audit_ariba_access": 16,
+
+  "create_requisition": 20
+}
