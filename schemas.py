@@ -97,6 +97,8 @@ class SAPAribaConnection(sdl.Entity):
 
 
 class ConnectionList(sdl.Entity):
+    id: str = ""
+    title: str = ""
     items: list[SAPAribaConnection] = Field(default_factory=list)
     total: int = 0
 
@@ -108,17 +110,23 @@ class AribaRecord(sdl.Entity):
 
 
 class AribaRecordList(sdl.Entity):
+    id: str = ""
+    title: str = ""
     items: list[AribaRecord] = Field(default_factory=list)
     total: int = 0
 
 
 class Capability(sdl.Entity):
+    id: str = ""
+    title: str = ""
     name: str
     available: bool
     note: str
 
 
 class AccessAudit(sdl.Entity):
+    id: str = ""
+    title: str = ""
     realm: str
     capabilities: list[Capability] = Field(default_factory=list)
     available_count: int = 0
@@ -127,5 +135,6 @@ class AccessAudit(sdl.Entity):
 
 
 class DeleteResult(sdl.Entity):
+    title: str = ""
     deleted: bool
     id: str
