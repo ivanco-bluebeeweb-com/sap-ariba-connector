@@ -112,7 +112,7 @@ async def connect_ariba(ctx, params: ConnectAribaParams) -> ActionResult:
     }
     connections.append(record)
     await _save_connections(ctx, connections)
-    return ActionResult.ok(_connection_entity(record))
+    return ActionResult.success(_connection_entity(record)), summary="Ariba connected."
 
 
 @chat.function("disconnect_ariba", "Disconnect one SAP Ariba realm: deletes only the credentials saved in Imperal. Nothing is changed in Ariba.", action_type="write", chain_callable=True, data_model=DeleteResult, event="sap-ariba-connector.disconnect_ariba", effects=["sap_ariba.provider.disconnected"])
@@ -123,7 +123,7 @@ async def disconnect_ariba(ctx, params: DisconnectAribaParams) -> ActionResult:
     if len(remaining) == len(connections):
         return ActionResult.error("Connection not found.", code="SAP_ARIBA_CONNECTION_NOT_FOUND")
     await _save_connections(ctx, remaining)
-    return ActionResult.ok(DeleteResult(deleted=True, id=params.connection_id))
+    return ActionResult.success(DeleteResult(deleted=True, id=params.connection_id)), summary="Ariba disconnected."
 
 
 @chat.function("list_connections", "List the connected SAP Ariba realms.", action_type="read", chain_callable=True, data_model=ConnectionList, event="sap-ariba-connector.list_connections")
@@ -131,7 +131,7 @@ async def list_connections(ctx, params: NoParams) -> ActionResult:
     """Imperal action: list_connections."""
     connections = await _load_connections(ctx)
     items = [_connection_entity(c) for c in connections]
-    return ActionResult.ok(ConnectionList(items=items, total=len(items)))
+    return ActionResult.success(ConnectionList(items=items, total=len(items))), summary="Connections listed."
 
 
 async def _list_resource(ctx, params, path: str, id_key: str, title_keys: list[str], extra_params: dict | None = None) -> ActionResult:
@@ -147,7 +147,7 @@ async def _list_resource(ctx, params, path: str, id_key: str, title_keys: list[s
     except ac.SAPAribaError as exc:
         return ActionResult.error(str(exc), code="SAP_ARIBA_REQUEST_FAILED", retryable=exc.retryable)
     records = [_record(item, id_key, title_keys) for item in ac.rest_items(body)]
-    return ActionResult.ok(AribaRecordList(items=records, total=len(records)))
+    return ActionResult.success(AribaRecordList(items=records, total=len(records))), summary=" list resource done."
 
 
 async def _get_resource(ctx, params, path: str, id_key: str, title_keys: list[str]) -> ActionResult:
@@ -159,7 +159,7 @@ async def _get_resource(ctx, params, path: str, id_key: str, title_keys: list[st
         body = await client.request("get", path)
     except ac.SAPAribaError as exc:
         return ActionResult.error(str(exc), code="SAP_ARIBA_REQUEST_FAILED", retryable=exc.retryable)
-    return ActionResult.ok(_record(body, id_key, title_keys))
+    return ActionResult.success(_record(body, id_key, title_keys)), summary=" get resource done."
 
 
 @chat.function("list_requisitions", "List Requisitions (Approvable APIs), optionally filtered by status.", action_type="read", chain_callable=True, data_model=AribaRecordList, event="sap-ariba-connector.list_requisitions")
@@ -187,7 +187,7 @@ async def create_requisition(ctx, params: CreateRequisitionParams) -> ActionResu
         body = await client.request("post", "/api/requisitioning/v1/prod/requisitions", json_body=payload)
     except ac.SAPAribaError as exc:
         return ActionResult.error(str(exc), code="SAP_ARIBA_REQUEST_FAILED", retryable=exc.retryable)
-    return ActionResult.ok(_record(body, "id", ["title", "Title"]))
+    return ActionResult.success(_record(body, "id", ["title", "Title"])), summary="Requisition created."
 
 
 @chat.function("list_purchase_orders", "List Purchase Orders (Approvable APIs), optionally filtered by supplier.", action_type="read", chain_callable=True, data_model=AribaRecordList, event="sap-ariba-connector.list_purchase_orders")
@@ -280,10 +280,10 @@ async def audit_ariba_access(ctx, params: AuditAccessParams) -> ActionResult:
         except ac.SAPAribaError as exc:
             capabilities.append(Capability(name=name, available=False, note=str(exc)))
     available = sum(1 for c in capabilities if c.available)
-    return ActionResult.ok(AccessAudit(
+    return ActionResult.success(AccessAudit(
         realm=connection.get("realm", ""),
         capabilities=capabilities,
         checks=capabilities,
         available_count=available,
         unavailable_count=len(capabilities) - available,
-    ))
+    )), summary="Ariba access audit ready."
