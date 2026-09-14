@@ -1,13 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="SAP Ariba Connector">
-  <defs>
-    <linearGradient id="bg" x1="14" y1="12" x2="114" y2="118" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#009DE0"/>
-      <stop offset="1" stop-color="#003A6D"/>
-    </linearGradient>
-  </defs>
-  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
-  <circle cx="52" cy="94" r="7" fill="#fff"/>
-  <circle cx="86" cy="94" r="7" fill="#fff"/>
-  <path d="M28 34h12l10 46h44l9-32H54" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M60 28h20M70 18v20" stroke="#fff" stroke-opacity=".8" stroke-width="6" stroke-linecap="round"/>
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_91_1573)">
+<path d="M0 32.3375V95.6627H64.6859L127.999 32.3451H0V32.3375Z" fill="url(#paint0_linear_91_1573)"/>
+<path d="M78.0797 61.808H75.3797V51.944H78.0797C81.6837 51.944 84.5537 53.13 84.5537 56.816C84.5537 60.622 81.6837 61.812 78.0797 61.812M49.0197 68.872C47.6797 68.878 46.3497 68.644 45.0937 68.18L48.9817 55.92H49.0617L52.8717 68.22C51.6357 68.66 50.3317 68.88 49.0237 68.88M77.3637 43.928H65.0997V73.088L54.3877 43.928H43.7797L34.6317 68.3C33.6637 62.164 27.3037 60.034 22.2997 58.444C19.0037 57.384 15.4917 55.844 15.5237 54.098C15.5517 52.686 17.4097 51.378 21.0717 51.57C23.5397 51.694 25.7377 51.89 30.0417 53.984L34.3177 46.564C30.3717 44.55 24.9057 43.284 20.4297 43.274H20.3897C15.1697 43.274 10.8257 44.974 8.12969 47.76C6.26569 49.68 5.21369 52.24 5.19369 54.914C5.12369 58.67 6.50769 61.334 9.40369 63.468C11.8537 65.264 14.9797 66.418 17.7397 67.288C21.1457 68.334 23.9257 69.256 23.8937 71.214C23.8738 71.9284 23.5852 72.6089 23.0857 73.12C22.2377 73.994 20.9357 74.33 19.1317 74.372C15.6557 74.442 13.0817 73.902 8.97569 71.476L5.17969 78.988C9.40769 81.388 14.1857 82.66 19.0477 82.678H19.6877C23.9877 82.598 27.4637 81.368 30.2397 79.138L30.6897 78.75L29.4757 82.03H40.6057L42.4757 76.342C46.6757 77.702 51.1957 77.722 55.4097 76.396L57.2097 82.036H75.3697V70.28H79.3357C88.9077 70.28 94.5757 65.408 94.5757 57.232C94.5757 48.132 89.0657 43.952 77.3517 43.952" fill="white"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_91_1573" x1="63.3568" y1="32.5394" x2="63.3568" y2="96.4508" gradientUnits="userSpaceOnUse">
+<stop stop-color="#00B8F1"/>
+<stop offset="0.22" stop-color="#06A5E5"/>
+<stop offset="0.79" stop-color="#1870C5"/>
+<stop offset="1" stop-color="#1D61BC"/>
+</linearGradient>
+<clipPath id="clip0_91_1573">
+<rect width="128" height="128" fill="white"/>
+</clipPath>
+</defs>
 </svg>
